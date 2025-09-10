@@ -4,7 +4,6 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '© OpenStreetMap contributors'
 }).addTo(map);
 
-// Function to search a place using Nominatim
 function searchPlace(query) {
   const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`;
 
@@ -22,7 +21,7 @@ function searchPlace(query) {
     })
 }
 
-// Load events from NYC Open Data
+
 $.getJSON('https://data.cityofnewyork.us/resource/tvpp-9vvx.json?$limit=50', function(data) {
   console.log('Events:', data);
 

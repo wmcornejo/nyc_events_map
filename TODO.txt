@@ -1,0 +1,11 @@
+https://geoservice.planning.nyc.gov
+Use the above link for geocoding, faster than OSM Nominatim
+You can go two ways:
+Load everything you get at the start, or require filtering before hand
+Maybe require fitlering, but before hand show upcoming events, like the
+most popular ones.
+-The times are really precise with start and end times, so use that for the
+filtering function on the web page.
+- Get and load precint, community board and other geoJSONs and link them to the
+search of events
+- 
