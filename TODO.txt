@@ -9,3 +9,16 @@ filtering function on the web page.
 - Get and load precinct, community board and other geoJSONs and link them to the
 search of events
 - 
+Park has GIS PropNum, ompropid, gisobjid
+
+Park permit areas has GIS PropNum for parks, and OMPPROPID (Unique identification number for a 
+property or portion of a property. In some cases – a standalone, smaller park for example – 
+this number will be equivalent to the GIS Property Number. In other cases – a zone, playground 
+or other site within a larger park – an additional designation of letters and/or numbers will be added.)
+or just Name, or SubPropertyName or SYSTEM(i think is best, over Name) or CEMSID, PropertyName is park name
+
+Use Athletic Fields Too. 
+
+i think they load now.
+
+so add filtering.

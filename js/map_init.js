@@ -7,6 +7,8 @@ const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 let boroughLayer;
 let precinctLayer;
 let parksLayer;
+let athleticsLayer;
+let parksPermitLayer;
 const layerControl = L.control.layers(null, {}).addTo(map);
 
 function searchPlace(query) {
@@ -26,24 +28,96 @@ function searchPlace(query) {
     })
 }
 
+function plotGeometry(geometry, label = '') {
+  if (geometry.type === 'Point') {
+    const coords = geometry.coordinates;
+    const latlng = [coords[1], coords[0]];
+    const marker = L.marker(latlng).addTo(map);
+    marker.bindPopup(`<strong>${label}</strong>`).openPopup();
+  } else if (geometry.type === 'Polygon' || geometry.type === 'MultiPolygon') {
+    const layer = L.geoJSON(geometry, {
+      style: {
+        color: '#ff6600',
+        weight: 2
+      },
+      onEachFeature: function (feature, layer) {
+        layer.bindPopup(`<strong>${label}</strong>`);
+      }
+    }).addTo(map);
+  } else {
+    console.warn('Unsupported geometry type:', geometry.type);
+  }
+}
 
-$.getJSON('https://data.cityofnewyork.us/resource/tvpp-9vvx.json?$limit=50', function(data) {
-  console.log('Events:', data);
+function getPoint(bname, pname, spname, eventName) {
+  let found = false;
 
-  let delay = 0;
+  if (!parksPermitLayer) {
+    console.warn("parksPermitLayer not loaded yet.");
+    return;
+  }
+  //console.log('Parks permits check')
+  parksPermitLayer.eachLayer(function(layer) {
+    if (found) return;
 
-  data.forEach((event, i) => {
-    const location_e = event.event_location;
-    if (location_e && location_e.includes(':')) {
-      const location_2 = location_e.split(':')[0];
-     //setTimeout(() => {
-     //   searchPlace(location_2);
-     // }, delay);
-
-      //delay += 1000; // 1 second between requests
+    const props = layer.feature.properties;
+   //console.log('Checking park:', pname, ' to ', props.propertyname);
+    //console.log('Checking subpark:', spname, ' to ', props.name);
+    //console.log('To', bname, ' - ', props.bname)
+  if (
+    bname === props.bname &&
+    props.propertyname && pname &&
+    props.propertyname.trim().toLowerCase() === pname.trim().toLowerCase() &&
+    props.name && spname &&
+    props.name.trim().toLowerCase() === spname.trim().toLowerCase()
+  ) {
+      const geometry = layer.feature.geometry;
+      plotGeometry(geometry,eventName);
+      found = true;
+      //console.log(' Found in parksPermitLayer');
     }
   });
-});
+
+  if (!found) {
+    //console.log(' Not found in parksPermitLayer:', pname ,'Trying athleticsLayer...');
+
+    if (!athleticsLayer) {
+      //console.warn("athleticsLayer not loaded yet.");
+      return;
+    }
+
+    athleticsLayer.eachLayer(function(layer) {
+      if (found) return;
+
+      const props = layer.feature.properties;
+      if (
+        bname === props.bname &&
+        pname && props.eapply &&
+        props.eapply.trim().toLowerCase() === pname.trim().toLowerCase() &&
+        props.sub && spname &&
+        props.sub.trim().toLowerCase() === spname.trim().toLowerCase()
+      ) {
+        const geometry = layer.feature.geometry;
+        plotGeometry(geometry, eventName);
+        found = true;
+        //console.log('Found in athleticsLayer');
+      }
+    });
+  }
+
+  //if (!found) {
+  //  console.log('No match found in either layer for:', pname, spname);
+  //}
+}
+
+function safeGetPoint(bname, pname, spname, eventName='') {
+  if (parksPermitLayer && typeof parksPermitLayer.eachLayer === 'function') {
+    getPoint(bname,pname, spname, eventName);
+  } else {
+    setTimeout(() => safeGetPoint(bname, pname, spname, eventName), 300);
+  }
+}
+
 
 
 
@@ -76,12 +150,52 @@ fetch('data/Borough Boundaries_20250909.geojson')
   fetch('data/Parks Properties_20250916.geojson')
   .then(res => res.json())
   .then(geojson => {
-    boroughLayer = L.geoJSON(geojson, {
+    parksLayer = L.geoJSON(geojson, {
       style: {
         color: '#33cc3dff',
         weight: 2
       }
     }).addTo(map);
-    layerControl.addOverlay(boroughLayer, 'Parks Properties');
+    layerControl.addOverlay(parksLayer, 'Parks Properties');
+  });
+fetch('data/Parks Permit Areas_20250923.geojson')
+  .then(res => res.json())
+  .then(geojson => {
+    parksPermitLayer = L.geoJSON(geojson, {
+      style: {
+        color: '#b71bdaff',
+        weight: 2
+      }
+    }).addTo(map);
+    layerControl.addOverlay(parksPermitLayer, 'Parks Permit Areas');
+  });
+fetch('data/Athletic Facilities_20250923.geojson')
+  .then(res => res.json())
+  .then(geojson => {
+    athleticsLayer = L.geoJSON(geojson, {
+      style: {
+        color: '#b71bdaff',
+        weight: 2
+      }
+    }).addTo(map);
+    layerControl.addOverlay(athleticsLayer, 'Athletic Facilities');
   });
 
+  $.getJSON('https://data.cityofnewyork.us/resource/tvpp-9vvx.json?$limit=10000', function(data) {
+  console.log('Events:', data);
+
+  let delay = 0;
+
+  data.forEach((event, i) => {
+    const location_e = event.event_location;
+    const eventName = event.event_name;
+    //console.log('Location', location_e);
+    const boro = event.event_borough;
+    if (location_e && location_e.includes(':')) {
+      const location_1 = location_e.split(':')[0]
+      const location_2 = location_e.split(':')[1]
+      //console.log('Locations:', location_1, location_2)
+      safeGetPoint(boro, location_1, location_2, eventName);
+    }
+  });
+});
