@@ -27,24 +27,63 @@
   <!--Link to JS-->
   <script src="js/map_init.js" defer></script>
 
-  <!--Link to Google Lookup API-->
-
+<link rel="stylesheet" href="node_modules/leaflet-search/dist/leaflet-search.src.css">
+<script src="node_modules/leaflet-search/dist/leaflet-search.src.js"></script>
 </head>
 <body>
-      <div class="main-content">
+    <div class="main">
     <h1 class="display-4 mb-3">Mapping NYC Permitted Events</h1>
     <h2><i>Find what is happening near you!</i></h2>
 
-    <p>Please enter:
+    <p>Please enter what event you are looking for in the search box below
     </p>
       <search>
-    <form action="./search/">
-      <label for="Borough">Enter a Borough</label>
-      <input type="search" id="borough" name="q" />
-      <button type="submit">Search</button>
-    </form>
-  </search>
+
+    <div id='findbox'>
+
     </div>
-       <div id="map"></div>
+  </search>
+      <div id="mySidenav" class="sidenav">
+    <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+    <h3> Advanced Filter </h3>
+      <form id="filterForm" onsubmit="return false;">
+    <label for="boroughSelect">Borough:</label>
+    <select id="boroughSelect">
+      <option value="">All</option>
+      <option value="Manhattan">Manhattan</option>
+      <option value="Brooklyn">Brooklyn</option>
+      <option value="Queens">Queens</option>
+      <option value="Bronx">Bronx</option>
+      <option value="Staten Island">Staten Island</option>
+    </select>
+    <br><br>
+    <label for="eventTypeSelect">Event Type:</label>
+    <select id="eventTypeSelect">
+      <option value="">All</option>
+      <option value="Concert">Concert</option>
+      <option value="Parade">Parade</option>
+      <option value="Festival">Festival</option>
+      <!-- Add more types as needed -->
+    </select>
+    <br><br>
+    <label for="dateInput1">Date Start:</label>
+    <input type="date" id="dateInput1">
+    <br><br>
+    <label for="dateInput2">Date End:</label>
+    <input type="date" id="dateInput2">
+    <br><br>
+    <button type="button" onclick="applyFilters()">Apply Filters</button>
+    <button type="button" onclick="resetFilters()">Reset</button>
+  </form>
+  </div>
+
+    <a href="javascript:void(0)" class="advanced-search" onclick="openNav()">Advanced Filter</a>
+
+
+  
+  <div id="map"></div>
+  </div>
+
+       
 </body>
 </html>

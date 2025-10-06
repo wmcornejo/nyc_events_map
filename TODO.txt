@@ -22,3 +22,11 @@ Use Athletic Fields Too.
 i think they load now.
 
 so add filtering.
+
+for next meeting:
+add the filtering, hide the layers and add the searching
+
+user types something, dropdown shows what event name has that string
+advanced filtering options: time, event type, borough
+
+make filtering like nyc opendata, where you can pick more than one case
