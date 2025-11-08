@@ -30,3 +30,24 @@ user types something, dropdown shows what event name has that string
 advanced filtering options: time, event type, borough
 
 make filtering like nyc opendata, where you can pick more than one case
+
+add list or table to filtering
+
+10/13
+So i noticed how there are instances where i select all events of a event type across all
+boroughs. that is because I couldnt link them to a park subproperty. For those I have to link
+them to something, maybe actually use geoservice.
+
+todo:
+add date filtering, start and end
+make table look like table
+multiple options for event types
+
+11/08
+Advanced Filter: event type gets all type of events, even those not captured in layer yet
+event date is fine, not specified for time
+borough filter is fine, if all have to specify for all
+
+todo:
+consider street segments where there is more than one line segment in use
+add a spinning circle animation until all the data is loaded

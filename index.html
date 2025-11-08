@@ -48,7 +48,7 @@
     <h3> Advanced Filter </h3>
       <form id="filterForm" onsubmit="return false;">
     <label for="boroughSelect">Borough:</label>
-    <select id="boroughSelect">
+    <select id="boroughSelect" multiple>
       <option value="">All</option>
       <option value="Manhattan">Manhattan</option>
       <option value="Brooklyn">Brooklyn</option>
@@ -60,10 +60,6 @@
     <label for="eventTypeSelect">Event Type:</label>
     <select id="eventTypeSelect">
       <option value="">All</option>
-      <option value="Concert">Concert</option>
-      <option value="Parade">Parade</option>
-      <option value="Festival">Festival</option>
-      <!-- Add more types as needed -->
     </select>
     <br><br>
     <label for="dateInput1">Date Start:</label>
@@ -82,6 +78,8 @@
 
   
   <div id="map"></div>
+  <!-- Now a table -->
+   <div id = 'tableDiv'></div>
   </div>
 
        
