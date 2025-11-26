@@ -50,4 +50,17 @@ borough filter is fine, if all have to specify for all
 
 todo:
 consider street segments where there is more than one line segment in use
-add a spinning circle animation until all the data is loaded
+add a spinning circle animation until all the data is loaded: so far it takes ~29 seconds
+some some events have > 1 street segment. for those, the only lat lon pairs are plotted. if they are valid
+they do give segment ids, so I would have to call the geoservice api again to get the other segments
+its the api call that has multiple in one column, from nyc open datas
+
+11/10
+after meeting:
+fix box, make it interactive
+add mutliple street segments, if possible
+fix styling
+the loading screen takes too long, maybe make one like in GTA, where you show a slide show of events?
+(maybe while it loads, add a cool way to animate different divisions of nyc)
+color events based on event type
+

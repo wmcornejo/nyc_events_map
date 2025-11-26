@@ -127,12 +127,7 @@
 .leaflet-control-search .search-alert {
 	cursor:pointer;
 	clear:both;
-	font-size:.75em;
-	margin-bottom:5px;
-	padding:0 .25em;
-	color:#e00;
-	font-weight:bold;
-	border-radius:.25em;
+
 }
 
 

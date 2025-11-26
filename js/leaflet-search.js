@@ -101,18 +101,8 @@ L.Control.Search = L.Control.extend({
 		textCancel: 'Cancel',		    //title in cancel button		
 		textPlaceholder: 'Search...',   //placeholder value			
 		hideMarkerOnCollapse: false,    //remove circle and marker on search control collapsed		
-		position: 'topleft',		
-		marker: {						//custom L.Marker or false for hide
-			icon: false,				//custom L.Icon for maker location or false for hide
-			animate: true,				//animate a circle over location found
-			circle: {					//draw a circle in location found
-				radius: 10,
-				weight: 3,
-				color: '#e03',
-				stroke: true,
-				fill: false
-			}
-		}
+		position: 'topleft'
+
 	},
 
 	_getPath: function(obj, prop) {
@@ -153,7 +143,8 @@ L.Control.Search = L.Control.extend({
 		this._input = this._createInput(this.options.textPlaceholder, 'search-input');
 		this._tooltip = this._createTooltip('search-tooltip');
 		this._cancel = this._createCancel(this.options.textCancel, 'search-cancel');
-		this._button = this._createButton(this.options.textPlaceholder, 'search-button');
+		//this._button = this._createButton(this.options.textPlaceholder, 'search-button');
+		
 		this._alert = this._createAlert('search-alert');
 
 		if(this.options.collapsed===false)
@@ -941,7 +932,7 @@ L.Control.Search.Marker = L.Marker.extend({
 		circle: {
 			radius: 10,
 			weight: 3,
-			color: '#e03',
+			color: 'rgba(105, 118, 179, 1)',
 			stroke: true,
 			fill: false
 		}

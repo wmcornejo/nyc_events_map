@@ -8,13 +8,15 @@
   position: fixed; /* Stay in place */
   z-index: 1; /* Stay on top */
   top: 0; /* Stay at the top */
-  left: 30px;
+  left: 15px;
   background-color: #ffff; /* Black*/
   overflow-x: hidden; /* Disable horizontal scroll */
   padding-top: 30px; /* Place content 60px from the top */
   transition: 0.5s; /* 0.5 second transition effect to slide in the sidenav */
 }
-
+body{
+  background-color: rgb(190, 197, 207);
+}
 
 /* The navigation menu links */
 .sidenav a {
@@ -71,8 +73,12 @@
   color: white;
   cursor: pointer;
 }
+tr:hover{
+    background-color: #818181;
+  color: white;
+  cursor: pointer;
+}
 
-/* Have to make actual table lines*/
 #tableDiv {
   margin-top: 20px;
   max-height: 300px;
@@ -80,11 +86,16 @@
   border: 1px solid #ccc;
 
 }
-/* Have to make actual table lines*/
+
 table {
   width: 100%;
   border-collapse: collapse;
   font-family: Arial, Helvetica, sans-serif;
   
 
+
+}
+table, th, td {
+  border: 1px solid ;
+  background-color: #efecec;
 }

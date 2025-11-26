@@ -28,6 +28,7 @@
   <script src="js/map_init.js" defer></script>
 
 <link rel="stylesheet" href="css/leaflet-search.css">
+<link rel="stylesheet" href="css/loading.css">
 <script src="js/leaflet-search.js"></script>
 </head>
 <body>
@@ -40,7 +41,6 @@
       <search>
 
     <div id='findbox'>
-
     </div>
   </search>
       <div id="mySidenav" class="sidenav">
@@ -74,12 +74,18 @@
   </div>
 
     <a href="javascript:void(0)" class="advanced-search" onclick="openNav()">Advanced Filter</a>
-
-
-  
-  <div id="map"></div>
+    
+<div id="map">
+  <div class="loader-overlay" id="loaderOverlay">
+    <div class="loader" id="loader"></div>
+    <div class="progress-container">
+      <div class="progress-bar" id="progressBar" style="width: 0%;"></div>
+    </div>
+  </div>
+</div>
   <!-- Now a table -->
    <div id = 'tableDiv'></div>
+  
   </div>
 
        

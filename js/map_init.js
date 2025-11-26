@@ -35,6 +35,7 @@ function segmentToGeoJSON(display, event) {
   const fromLon = parseFloat(display.out_from_longitude);
   const toLat = parseFloat(display.out_to_latitude);
   const toLon = parseFloat(display.out_to_longitude);
+  //console.log('fromLat:', fromLat, 'fromLon:', fromLon, 'toLat:', toLat, 'toLon:', toLon);
   if (isNaN(fromLat) || isNaN(fromLon) || isNaN(toLat) || isNaN(toLon)) {
     throw new Error("Invalid coordinates in segment data");
   }
@@ -92,11 +93,12 @@ async function fetchSegmentFromGOAT(onStreet, fromStreet, toStreet, borough) {
     Key: GOAT_API_KEY
   });
   const url = `${GOAT_API_BASE}?${params.toString()}`;
-  //console.log('GOAT API URL:', url);
+
+  console.log('GOAT API URL:', url);
   const response = await fetch(url);
   //console.log('response:', response);
   const data = await response.json();
-  //console.log('data:', data.display);
+  console.log('data in fetch:', data.display);
   return data;
 }
 function getPoint(bname, pname, spname, event) {
@@ -151,6 +153,11 @@ function getPoint(bname, pname, spname, event) {
       }
     });
   }
+}
+
+function updateProgressBar(percentage) {
+  const progressBar = document.querySelector('.progress-bar');
+  progressBar.style.width = `${percentage}%`;
 }
 
 function safeGetPoint(bname, pname, spname, event=[]) {
@@ -225,17 +232,25 @@ fetch('data/Athletic Facilities_20250923.geojson')
 // get event data from api
  (async function() {
   $.getJSON(
-    'https://data.cityofnewyork.us/resource/tvpp-9vvx.json?$limit=10000',
+    'https://data.cityofnewyork.us/resource/tvpp-9vvx.json?$limit=15000',
     async function (data) { // <-- make this async
       let delay = 0;
-
+      console.log('Total events;', data.length);
       for (const event of data) {
+        console.log('Percent complete:', ((data.indexOf(event) + 1) / data.length * 100).toFixed(2) + '%');
+        updateProgressBar(((data.indexOf(event) + 1) / data.length * 100).toFixed(2) );
+        //Update loader 
+        //console.log('Processing event:', event.event_name);
         eventtypes = [...new Set(data.map(e => e.event_type).filter(et => et))].sort();
-        console.log('Event types;', eventtypes);
+        //console.log('Event types;', eventtypes);
         const location_e = event.event_location;
 
         if (location_e && location_e.indexOf(':') === -1) {
-          // then we have a street segment
+          // then we have a street segment, could be more than one separated y ,
+          if (location_e.indexOf(',') !== -1) {
+            const segments = location_e.split(',');
+            //console.log('Segments:', segments);
+          }
           const parsed = parseLocation(location_e);
           if (parsed) {
             const { onStreet, fromStreet, toStreet } = parsed;
@@ -278,13 +293,7 @@ fetch('data/Athletic Facilities_20250923.geojson')
           safeGetPoint(boro, location_1, location_2, event);
         }
       }
-    }
-  );
-})();
-
-
-  setTimeout(() => {
-    // Create a FeatureCollection for all event polygons
+          // Create a FeatureCollection for all event polygons
     const eventPolygonFeatures = events2
       .filter(e => e.geometry && (e.geometry.type === 'Polygon' || e.geometry.type === 'MultiPolygon'))
       .map(e => ({
@@ -342,10 +351,24 @@ fetch('data/Athletic Facilities_20250923.geojson')
     }));
     
     if (eventPolygonLayer && map.hasLayer(eventPolygonLayer)) {
+      console.log('About to remove'); 
       map.removeLayer(eventPolygonLayer);
-      console.log('About to remove');
     }
-  }, 2000);
+    const loaderOverlay = document.getElementById('loaderOverlay');
+    if (loaderOverlay) loaderOverlay.style.display = 'none';
+
+    const loader = document.getElementById('loader');
+    if (loader) loader.style.display = 'none';
+
+    const progressBar = document.getElementById('progressBar');
+    if (progressBar) progressBar.style.display = 'none';
+        }
+    
+
+  );
+})();
+
+
 
 
 
@@ -446,7 +469,7 @@ function showTable(features){
   const tableDiv = document.getElementById('tableDiv');
   tableDiv.innerHTML= '';
   if (features.length == 0){
-    tableDiv.innerHTML = '<p>No events match the selected filters</p?';
+    tableDiv.innerHTML = '<p>No events match the selected filters</p';
     return;
   }
   const table = document.createElement('table');
@@ -455,7 +478,7 @@ function showTable(features){
   
   // Create table headers
   const headerRow = document.createElement('tr');
-  ['Event Name', 'Borough', 'Event Type', 'Start Date/Time'].forEach(headerText => {
+  ['Event ID', 'Event Name', 'Borough', 'Event Type', 'Start Date'].forEach(headerText => {
     const th = document.createElement('th');
     th.textContent = headerText;
     headerRow.appendChild(th);
@@ -464,9 +487,22 @@ function showTable(features){
   table.appendChild(thead);
   // Create table rows
   features.forEach(feature => {
+    // make each row clickable to zoom to that event on the map
+
     const row = document.createElement('tr');
+    row.style.cursor = 'pointer';
+    row.onclick = function() {
+      const layer = window.filteredEventLayer.getLayers().find(l => l.feature.properties.event_id === feature.properties.event_id);
+      if (layer) {
+        map.flyToBounds(layer.getBounds(), {
+          duration: 2.5
+        });
+        layer.openPopup();
+      }
+    }
     const props = feature.properties;
     const cells = [
+      props.event_id || '',
       props.event_name || '',
       props.event_borough || '',
       props.event_type || '',
@@ -480,6 +516,9 @@ function showTable(features){
     tbody.appendChild(row);
   });
   table.appendChild(tbody);
+  // make tr an href and onclick to zoom to that event on the map using the event_id
+
+
   tableDiv.appendChild(table);
 
   
