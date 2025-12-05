@@ -60,7 +60,8 @@ after meeting:
 fix box, make it interactive
 add mutliple street segments, if possible
 fix styling
-the loading screen takes too long, maybe make one like in GTA, where you show a slide show of events?
-(maybe while it loads, add a cool way to animate different divisions of nyc)
-color events based on event type
+the loading screen takes too long
 
+11/30
+have a loading bar now.
+also fix api call for just 30 days ahead.

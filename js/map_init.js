@@ -439,7 +439,17 @@ function applyFilters() {
             weight: 2
         },
         onEachFeature: function (feature, layer) {
-            layer.bindPopup(`<strong>${feature.properties.event_name}</strong><br>${feature.properties.start_date_time}`);
+            event_location = feature.properties.event_location;
+            console.log('raw event location', event_location);
+            if (event_location.includes(':')){
+               const [location_1, location_2] = event_location.split(':');
+               console.log('location_1:', location_1, 'location_2:', location_2);
+               if (location_1.trim() == location_2.trim()){
+                event_location = location_1;
+               }
+            }
+            console.log('event loc:', event_location);
+            layer.bindPopup(`<strong>${feature.properties.event_name}</strong><br><i>${feature.properties.event_type}</i><br>Located at ${event_location}<br>Hosted by ${feature.properties.event_agency}`);
         }
     });
 
@@ -465,6 +475,7 @@ function applyFilters() {
     showTable(filteredFeatures);
 }
 
+// Table display
 function showTable(features){
   const tableDiv = document.getElementById('tableDiv');
   tableDiv.innerHTML= '';
@@ -524,6 +535,7 @@ function showTable(features){
   
 }
 
+// Reset filters
 function resetFilters() {
   document.getElementById('filterForm').reset();
   if (window.filteredEventLayer) {
@@ -537,6 +549,7 @@ function resetFilters() {
   }
 }
 
+// Side Nav
 /* Set the width of the side navigation to 250px and the left margin of the page content to 250px */
 function openNav() {
   document.getElementById("mySidenav").style.width = "250px";
