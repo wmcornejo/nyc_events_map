@@ -65,3 +65,8 @@ the loading screen takes too long
 11/30
 have a loading bar now.
 also fix api call for just 30 days ahead.
+
+12/5
+replace table with tabulator
+fix up readme
+write one page summary and email

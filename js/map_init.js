@@ -472,9 +472,33 @@ function applyFilters() {
     map.addControl(window.eventSearchControl);
 
     // Call showTable to show a table of the filtered events
-    showTable(filteredFeatures);
+    showTable2(filteredFeatures);
 }
 
+function showTable2(features){
+  var tabledata = [];
+  const tableDiv = document.getElementById('tableDiv');
+  if (features.length == 0){
+    tableDiv.innerHTML = '<p>No events match the selected filters</p';
+    return;
+  }
+  features.forEach(feature => {
+    const props = feature.properties;
+    tabledata.push({
+      event_id: props.event_id || '',
+      event_name: props.event_name || '',
+      event_borough: props.event_borough || '',
+      event_type: props.event_type || '',
+      start_date_time: props.start_date_time || ''
+    })
+  })
+  //initialize table with tableDiv
+  var table = new Tabulator("#tableDiv", {
+      data:tabledata, //assign data to table
+      autoColumns:true, //create columns from data field names
+      layout: "fitColumns"
+  });
+}
 // Table display
 function showTable(features){
   const tableDiv = document.getElementById('tableDiv');
