@@ -1,13 +1,20 @@
 
+/* HTML: <div class="loader"></div> */
 .loader {
+  --c:#000;
+  width: fit-content;
   font-weight: bold;
-  font-family: sans-serif;
+  font-family: monospace;
   font-size: 30px;
-  animation: l1 1s linear infinite alternate;
+  color: #0000;
+  overflow: hidden;
+  text-shadow: 0 0 var(--c),11ch 0 var(--c);
+  animation: l6 2s infinite linear;
 }
 .loader:before {
   content:"Loading..."
 }
+@keyframes l6 {to{text-shadow:-11ch 0 var(--c),0ch 0 var(--c)}}
 .loader-overlay {
   position: absolute;
   top: 0;
@@ -20,7 +27,7 @@
   justify-content: center;
   align-items: center;
 }
-@keyframes l1 {to{opacity: 0}}
+
 
 #map {
   position: relative;
@@ -39,9 +46,10 @@
 }
 
 .progress-bar {
-  height: 20px; /* Adjust height as needed */
-  background-color: #4cf852; /* Green color for the progress bar */
-  width: 0%; /* Initial width, will be updated by JavaScript */
+  height: 20px;
+  background-color: #4cf852; 
+  width: 0%; 
   border-radius: 5px;
-  transition: width 0.5s ease-in-out; /* Smooth transition for width changes */
+  transition: width 0.5s ease-in-out; 
 }
+

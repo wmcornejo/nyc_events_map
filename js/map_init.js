@@ -24,7 +24,7 @@ let athleticsLayer;
 let parksPermitLayer;
 let events2 = [];
 let eventPolygonLayer;
-//eventtypes will hold unique event types for the filter dropdown
+// eventtypes will hold unique event types for the filter dropdown
 let eventtypes = [];
 
 const layerControl = L.control.layers(null, {}).addTo(map);
@@ -72,14 +72,10 @@ function parseLocation(locationStr) {
   const match = locationStr.match(/^(.+?)\s+between\s+(.+?)\s+and\s+(.+)$/i);
   if (!match) return null;
   let [, onStreet, fromStreet, toStreet] = match.map(s => s.trim());
-  // get first word of onStreet
-  //onStreet = onStreet.split(' ')[0];
-  //console.log(onStreet);
   return { onStreet, fromStreet, toStreet };
 }
 // Call GOAT Function 3 API
 async function fetchSegmentFromGOAT(onStreet, fromStreet, toStreet, borough) {
-  //console.log('Fetching from goat')
   const boroughCodeStr = boroughCode[borough.toUpperCase()] || "1";
 
   const params = new URLSearchParams({
@@ -239,24 +235,17 @@ fetch('data/Athletic Facilities_20250923.geojson')
       for (const event of data) {
         console.log('Percent complete:', ((data.indexOf(event) + 1) / data.length * 100).toFixed(2) + '%');
         updateProgressBar(((data.indexOf(event) + 1) / data.length * 100).toFixed(2) );
-        //Update loader 
-        //console.log('Processing event:', event.event_name);
         eventtypes = [...new Set(data.map(e => e.event_type).filter(et => et))].sort();
         //console.log('Event types;', eventtypes);
         const location_e = event.event_location;
 
         if (location_e && location_e.indexOf(':') === -1) {
-          // then we have a street segment, could be more than one separated y ,
           if (location_e.indexOf(',') !== -1) {
             const segments = location_e.split(',');
-            //console.log('Segments:', segments);
           }
           const parsed = parseLocation(location_e);
           if (parsed) {
             const { onStreet, fromStreet, toStreet } = parsed;
-            //console.log('location_e', location_e);
-            //console.log('Parsed location:', onStreet, fromStreet, toStreet);
-
             try {
               const goatResponse = await fetchSegmentFromGOAT(
                 onStreet,
@@ -266,12 +255,7 @@ fetch('data/Athletic Facilities_20250923.geojson')
               );
 
               if (goatResponse?.display) {
-                //const geojsonFeature = segmentToGeoJSON(goatResponse.display);
-                //console.log('in event api call')
-
                 const feature = segmentToGeoJSON(goatResponse.display, event);
-                //console.log('feature after segment:', feature);
-                //console.log(JSON.stringify(feature, null, 2));
                 if (feature) {
                   geojsonFeatures.push(feature);
                 } else {
@@ -332,7 +316,6 @@ fetch('data/Athletic Facilities_20250923.geojson')
         layer.bindPopup(`<strong>${name}</strong><br>${date}`);
       }
     });
-    //map.addLayer(eventPolygonLayer);
     layerControl.addOverlay(eventPolygonLayer, 'Event Polygons');
     const eventTypeSelect = document.getElementById('eventTypeSelect');
     eventtypes.forEach(type => {
@@ -367,11 +350,6 @@ fetch('data/Athletic Facilities_20250923.geojson')
 
   );
 })();
-
-
-
-
-
 
 function applyFilters() {
     console.log('Applying filters...');
@@ -408,8 +386,6 @@ function applyFilters() {
                 match = false;
             }
         }
-
-        // Optional: filter by end date if you want to use date2
         return match;
     }).map(e => ({
         type: "Feature",
@@ -494,8 +470,8 @@ function showTable2(features){
   })
   //initialize table with tableDiv
   var table = new Tabulator("#tableDiv", {
-      data:tabledata, //assign data to table
-      autoColumns:true, //create columns from data field names
+      data:tabledata,
+      autoColumns:true, 
       layout: "fitColumns"
   });
 }
@@ -574,14 +550,13 @@ function resetFilters() {
 }
 
 // Side Nav
-/* Set the width of the side navigation to 250px and the left margin of the page content to 250px */
 function openNav() {
   document.getElementById("mySidenav").style.width = "250px";
   document.querySelector(".main").style.marginLeft = "250px";
   document.body.style.backgroundColor = "white";
 }
 
-/* Set the width of the side navigation to 0 and the left margin of the page content to 0, and the background color of body to white */
+
 function closeNav() {
   document.getElementById("mySidenav").style.width = "0";
   document.querySelector(".main").style.marginLeft = "0";

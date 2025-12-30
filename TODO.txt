@@ -70,3 +70,7 @@ also fix api call for just 30 days ahead.
 replace table with tabulator
 fix up readme
 write one page summary and email
+
+12/29
+Additions: perhaps add a suggestions tool on what user is interested in finding
+must do: rewrite Readme.

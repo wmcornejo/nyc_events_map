@@ -5,7 +5,13 @@ Go to -> https://wmcornejo.github.io/nyc_events_map/
 
 ## Background
 
-NYC Open Data, managed by the Office of Technology & Innovation, provides free geospatial and tabular data from various agencies. With some spatial manipulation, the right data can paint a detailed picture of the city we all live in. The city, as any resident knows, is always bustling with events and businesses. While there are a multitude of maps documenting local events, there isn’t a consolidated space for smaller, more local events that are permitted by local government entities. The goal of this project is to provide a web map for residents to see what permitted events are taking place in the 5 boroughs. 
+NYC Open Data, managed by the Office of Technology & Innovation, provides free geospatial and tabular data from various agencies. With some spatial manipulation, the right data can paint a detailed picture of the city we all live in. The city is always bustling with events and businesses. While there are a multitude of maps documenting local events, there isn’t a consolidated space for smaller, more local events that are permitted by local government entities. The goal of this project is to provide a web map for residents to see what permitted events are taking place in the 5 boroughs. 
+
+
+
+## Getting Started
+
+To start working with this project, simply press the green <Code> button up top, near the 'Go to file' searchbox. Copy the link that appears, and in your terminal, type 'git clone https://github.com/wmcornejo/nyc_events_map.git'. This should start the download of the code respository. Once completed, you can start editing the files in a code editor. I use VSCode because it has an extension called 'Five Server' that can make the project go 'live' locally, and this is where I configure the code before updating the repository.
 
 ## Data
 
