@@ -74,3 +74,7 @@ write one page summary and email
 12/29
 Additions: perhaps add a suggestions tool on what user is interested in finding
 must do: rewrite Readme.
+
+1/25
+changes to layout, i want to make it all web map, then a right side bar with filtering and description
+move search box outside on top maybe

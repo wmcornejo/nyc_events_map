@@ -16,7 +16,30 @@ const osm = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x
 	maxZoom: 20
 }).addTo(map);
 
+// color scheme for layers
+const eventTypeColors = {
+  "Race / Run":             "#e63946",
+  "Parade":                 "#f4a261",
+  "Block Party":            "#e9c46a",
+  "Cleanup / Volunteer":    "#57cc99",
+  "Nature & Wildlife":      "#2a9d8f",
+  "Farmers Market":         "#80b918",
+  "Concert / Performance":  "#9b5de5",
+  "Film":                   "#f15bb5",
+  "Athletics":              "#0077cc",
+  "Demonstration":          "#ff6b6b",
+  "Construction":           "#adb5bd",
+  "Street Fair / Market":   "#ffb703",
+  "Special Event":          "#6a4c93",
+};
 
+
+const DEFAULT_EVENT_COLOR = "#888888";
+
+function getEventColor(eventType, eventName) {
+  const classified = classifyEventType(eventType, eventName);
+  return { color: eventTypeColors[classified] || DEFAULT_EVENT_COLOR, label: classified };
+}
 let boroughLayer;
 let precinctLayer;
 let parksLayer;
@@ -29,6 +52,75 @@ let eventtypes = [];
 
 const layerControl = L.control.layers(null, {}).addTo(map);
 
+
+function classifyEventType(eventType, eventName = "") {
+  const type = (eventType || "").toLowerCase();
+  const name = (eventName || "").toLowerCase();
+  const combined = `${type} ${name}`;
+
+  // Races / runs (e.g. "5K", "10K", "half marathon")
+  if (/\d+\s*k\b/.test(combined) || /\b(marathon|half marathon|run|race|dash)\b/.test(combined)) {
+    return "Race / Run";
+  }
+
+  // Parades
+  if (/\b(parade|march|procession)\b/.test(combined)) {
+    return "Parade";
+  }
+
+  // Block parties
+  if (/\bblock party\b/.test(combined)) {
+    return "Block Party";
+  }
+
+  // Cleanup / volunteer
+  if (/\b(clean.?up|cleanup|volunteer|beautification|litter)\b/.test(combined)) {
+    return "Cleanup / Volunteer";
+  }
+
+  // Nature / wildlife / birds
+  if (/\b(bird|birding|wildlife|nature walk|butterfly|bat walk|hawk)\b/.test(combined)) {
+    return "Nature & Wildlife";
+  }
+
+  // Farmers markets
+  if (/\b(farmer.?s?\s*market|greenmarket)\b/.test(combined)) {
+    return "Farmers Market";
+  }
+
+  // Concerts / performances
+  if (/\b(concert|performance|festival|music|show|dance|theater|theatre)\b/.test(combined)) {
+    return "Concert / Performance";
+  }
+
+  // Film
+  if (/\b(film|movie|shoot|production|filming)\b/.test(combined)) {
+    return "Film";
+  }
+
+  // Athletics / sports (non-race)
+  if (/\b(game|tournament|match|sport|athletic|basketball|soccer|tennis|baseball)\b/.test(combined)) {
+    return "Athletics";
+  }
+
+  // Demonstrations / rallies
+  if (/\b(demonstration|rally|protest|vigil|strike)\b/.test(combined)) {
+    return "Demonstration";
+  }
+
+  // Construction
+  if (/\b(construction|crane|scaffold|utility|excavation)\b/.test(combined)) {
+    return "Construction";
+  }
+
+  // Street fairs / markets
+  if (/\b(street fair|fair|flea market|bazaar|expo|vendor)\b/.test(combined)) {
+    return "Street Fair / Market";
+  }
+
+  // Fallback to raw event_type
+  return eventType || "Other";
+}
 function segmentToGeoJSON(display, event) {
   // return geojson version of segment
   const fromLat = parseFloat(display.out_from_latitude);
@@ -228,7 +320,7 @@ fetch('data/Athletic Facilities_20250923.geojson')
 // get event data from api
  (async function() {
   $.getJSON(
-    'https://data.cityofnewyork.us/resource/tvpp-9vvx.json?$limit=15000',
+    `https://data.cityofnewyork.us/resource/tvpp-9vvx.json?$limit=15000&$where=end_date_time >= '${new Date().toISOString().split('T')[0]}T00:00:00.000'`,
     async function (data) { // <-- make this async
       let delay = 0;
       console.log('Total events;', data.length);
@@ -299,16 +391,15 @@ fetch('data/Athletic Facilities_20250923.geojson')
       }
     }))
   ];
-    // Create a single layer for all event polygons
-    eventPolygonLayer = L.geoJSON({
-      type: "FeatureCollection",
-      features: allEventFeatures
-    }, {
-      style: feature => ({
-        color: feature.geometry.type === "LineString" ? '#0077cc' : '#ff6600',
-        weight: feature.geometry.type === "LineString" ? 4 : 2,
-        opacity: 0.8
-      }),
+      // Create a single layer for all event polygons
+      eventPolygonLayer = L.geoJSON({
+        type: "FeatureCollection",
+        features: allEventFeatures
+      }, {
+          style: feature => {
+            const { color } = getEventColor(feature.properties.event_type, feature.properties.event_name);
+            return { color, weight: feature.geometry.type === "LineString" ? 4 : 2, opacity: 0.8 };
+          },
       onEachFeature: function (feature, layer) {
         const props = feature.properties;
         const name = props.event_name || props.street || "Unnamed Event";
@@ -410,9 +501,9 @@ function applyFilters() {
         type: "FeatureCollection",
         features: filteredFeatures
     }, {
-        style: {
-            color: '#ff6600',
-            weight: 2
+        style: feature => {
+          const { color } = getEventColor(feature.properties.event_type, feature.properties.event_name);
+          return { color, weight: 2, opacity: 0.8 };
         },
         onEachFeature: function (feature, layer) {
             event_location = feature.properties.event_location;
@@ -548,18 +639,20 @@ function resetFilters() {
     window.eventSearchControl = null;
   }
 }
-
-// Side Nav
-function openNav() {
-  document.getElementById("mySidenav").style.width = "250px";
-  document.querySelector(".main").style.marginLeft = "250px";
-  document.body.style.backgroundColor = "white";
-}
+document.querySelector('.main').addEventListener('wheel', function(e) {
+  e.stopPropagation();
+});
 
 
-function closeNav() {
-  document.getElementById("mySidenav").style.width = "0";
-  document.querySelector(".main").style.marginLeft = "0";
-  document.body.style.backgroundColor = "white";
-}
-
+const legend = L.control({ position: 'bottomright' });
+legend.onAdd = function () {
+  const div = document.createElement('div');
+  div.style.cssText = 'background:white;padding:10px;border-radius:6px;font-size:13px;line-height:1.8;box-shadow:0 1px 4px rgba(0,0,0,0.2)';
+  div.innerHTML = '<strong>Event Types</strong><br>' +
+    Object.entries(eventTypeColors).map(([type, color]) =>
+      `<span style="display:inline-block;width:12px;height:12px;background:${color};border-radius:2px;margin-right:6px;vertical-align:middle"></span>${type}`
+    ).join('<br>') +
+    `<br><span style="display:inline-block;width:12px;height:12px;background:${DEFAULT_EVENT_COLOR};border-radius:2px;margin-right:6px;vertical-align:middle"></span>Other`;
+  return div;
+};
+legend.addTo(map);

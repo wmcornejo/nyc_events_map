@@ -34,63 +34,54 @@
 <script src="js/leaflet-search.js"></script>
 </head>
 <body>
-    <div class="main">
-    <h1 class="display-4 mb-3">Mapping NYC Permitted Events</h1>
-    <h2><i>Find what is happening near you!</i></h2>
-
-    <p>Please enter what event you are looking for in the search box below
-    </p>
-      <search>
-
-    <div id='findbox'>
-    </div>
-  </search>
-      <div id="mySidenav" class="sidenav">
-    <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
-    <h3> Advanced Filter </h3>
-      <form id="filterForm" onsubmit="return false;">
-    <label for="boroughSelect">Borough:</label>
-    <select id="boroughSelect" multiple>
-      <option value="">All</option>
-      <option value="Manhattan">Manhattan</option>
-      <option value="Brooklyn">Brooklyn</option>
-      <option value="Queens">Queens</option>
-      <option value="Bronx">Bronx</option>
-      <option value="Staten Island">Staten Island</option>
-    </select>
-    <br><br>
-    <label for="eventTypeSelect">Event Type:</label>
-    <select id="eventTypeSelect">
-      <option value="">All</option>
-    </select>
-    <br><br>
-    <label for="dateInput1">Date Start:</label>
-    <input type="date" id="dateInput1">
-    <br><br>
-    <label for="dateInput2">Date End:</label>
-    <input type="date" id="dateInput2">
-    <br><br>
-    <button type="button" onclick="applyFilters()">Apply Filters</button>
-    <button type="button" onclick="resetFilters()">Reset</button>
-  </form>
-  </div>
-
-    <a href="javascript:void(0)" class="advanced-search" onclick="openNav()">Advanced Filter</a>
-    
-<div id="map">
+<div id="map" >
   <div class="loader-overlay" id="loaderOverlay">
     <div class="loader" id="loader"></div>
     <div class="progress-container">
       <div class="progress-bar" id="progressBar" style="width: 0%;"></div>
     </div>
   </div>
-</div>
-  <!-- Now a table -->
-   <div id="example-table"></div>
-   <div id = 'tableDiv'></div>
   
-  </div>
+  <div class="main">
+    <h1 class="display-4 mb-3">Mapping NYC Permitted Events</h1>
+    <h2><i>Find what is happening near you!</i></h2>
 
-       
+    <p>Please enter what event you are looking for in the search box below</p>
+    <search>
+      <div id='findbox'></div>
+    </search>
+    
+    <div class="search-section">
+      <form id="filterForm" onsubmit="return false;">
+        <label for="boroughSelect">Borough:</label>
+        <select id="boroughSelect" multiple>
+          <option value="">All</option>
+          <option value="Manhattan">Manhattan</option>
+          <option value="Brooklyn">Brooklyn</option>
+          <option value="Queens">Queens</option>
+          <option value="Bronx">Bronx</option>
+          <option value="Staten Island">Staten Island</option>
+        </select>
+        <br><br>
+        <label for="eventTypeSelect">Event Type:</label>
+        <select id="eventTypeSelect">
+          <option value="">All</option>
+        </select>
+        <br><br>
+        <label for="dateInput1">Date Start:</label>
+        <input type="date" id="dateInput1">
+        <br><br>
+        <label for="dateInput2">Date End:</label>
+        <input type="date" id="dateInput2">
+        <br><br>
+        <button type="button" onclick="applyFilters()">Apply Filters</button>
+        <button type="button" onclick="resetFilters()">Reset</button>
+      </form>
+    </div>
+  
+</div>
+  </div>
+      <div id="example-table"></div>
+    <div id="tableDiv"></div>
 </body>
 </html>

@@ -21,22 +21,20 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(255,255,255,0.8);
+  background: rgba(27, 21, 21, 0.8);
   z-index: 9999;
   display: flex;
   justify-content: center;
   align-items: center;
 }
-
-
 #map {
   position: relative;
-  height: 80vh;
+  height: 100vh;
   width: 100%;
 }
 .progress-container {
   width: 50%;
-  background-color: #c0bcbc;
+  background-color: #f7f5f3;
   border-radius: 5px;
   overflow: hidden;
   position: absolute;
@@ -47,7 +45,7 @@
 
 .progress-bar {
   height: 20px;
-  background-color: #4cf852; 
+  background-color: #24d533; 
   width: 0%; 
   border-radius: 5px;
   transition: width 0.5s ease-in-out; 
