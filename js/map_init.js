@@ -35,7 +35,19 @@ const eventTypeColors = {
 
 
 const DEFAULT_EVENT_COLOR = "#888888";
-
+// Make sure this runs AFTER eventTypeColors is defined
+const legend = L.control({ position: 'bottomleft' });
+legend.onAdd = function () {
+  const div = document.createElement('div');
+  div.className = 'legend';   // <-- add this
+  div.innerHTML = '<strong>Event Types</strong><br>' +
+    Object.entries(eventTypeColors).map(([type, color]) =>
+      `<span style="display:inline-block;width:12px;height:12px;background:${color};border-radius:2px;margin-right:6px;vertical-align:middle"></span>${type}`
+    ).join('<br>') +
+    `<br><span style="display:inline-block;width:12px;height:12px;background:${DEFAULT_EVENT_COLOR};border-radius:2px;margin-right:6px;vertical-align:middle"></span>Other`;
+  return div;
+};
+legend.addTo(map);
 function getEventColor(eventType, eventName) {
   const classified = classifyEventType(eventType, eventName);
   return { color: eventTypeColors[classified] || DEFAULT_EVENT_COLOR, label: classified };
@@ -94,7 +106,7 @@ function classifyEventType(eventType, eventName = "") {
   }
 
   // Film
-  if (/\b(film|movie|shoot|production|filming)\b/.test(combined)) {
+  if (/\b(film|movie|shoot|production|filming|)\b/.test(combined)) {
     return "Film";
   }
 
@@ -643,16 +655,3 @@ document.querySelector('.main').addEventListener('wheel', function(e) {
   e.stopPropagation();
 });
 
-
-const legend = L.control({ position: 'bottomright' });
-legend.onAdd = function () {
-  const div = document.createElement('div');
-  div.style.cssText = 'background:white;padding:10px;border-radius:6px;font-size:13px;line-height:1.8;box-shadow:0 1px 4px rgba(0,0,0,0.2)';
-  div.innerHTML = '<strong>Event Types</strong><br>' +
-    Object.entries(eventTypeColors).map(([type, color]) =>
-      `<span style="display:inline-block;width:12px;height:12px;background:${color};border-radius:2px;margin-right:6px;vertical-align:middle"></span>${type}`
-    ).join('<br>') +
-    `<br><span style="display:inline-block;width:12px;height:12px;background:${DEFAULT_EVENT_COLOR};border-radius:2px;margin-right:6px;vertical-align:middle"></span>Other`;
-  return div;
-};
-legend.addTo(map);

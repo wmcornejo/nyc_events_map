@@ -1,87 +1,568 @@
+
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>NYC Permitted Events Map</title>
+  <title>NYC Events Map</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
- <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-     crossorigin=""/>
- <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-     crossorigin=""></script>
-  <!-- My CSS -->
-  <link rel="stylesheet" href="css/styles.css" />
-
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-  <link
-  rel="stylesheet"
-  href="https://unpkg.com/leaflet.fullscreen@1.6.0/Control.FullScreen.css"
-  />
-  <script
-    src="https://unpkg.com/leaflet.fullscreen@1.6.0/Control.FullScreen.js"
-  ></script>
+ 
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.fullscreen@1.6.0/Control.FullScreen.css"/>
+  <script src="https://unpkg.com/leaflet.fullscreen@1.6.0/Control.FullScreen.js"></script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
   <link href="https://unpkg.com/tabulator-tables/dist/css/tabulator.min.css" rel="stylesheet">
-<script type="text/javascript" src="https://unpkg.com/tabulator-tables/dist/js/tabulator.min.js"></script>
-  <!--Link to JS-->
-  <script src="js/map_init.js" defer></script>
+  <script src="https://unpkg.com/tabulator-tables/dist/js/tabulator.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+ 
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/leaflet-search.css">
+ 
+  <script src="js/leaflet-search.js"></script>
+ 
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+ 
+    :root {
+      --ink: #0d0d0d;
+      --paper: #f5f2ec;
+      --panel: #ffffff;
+      --accent: #e8ff47;
+      --accent2: #ff4d4d;
+      --muted: #888;
+      --border: #e0ddd6;
+      --panel-w: 340px;
+      --mono: 'DM Mono', monospace;
+      --sans: 'Syne', sans-serif;
+      --radius: 10px;
+    }
+ 
+    html, body {
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      font-family: var(--sans);
+      background: var(--paper);
+      color: var(--ink);
+    }
+ 
+    /* ── Layout ── */
+    #app {
+      display: flex;
+      height: 100vh;
+      width: 100vw;
+    }
+ 
+    #map {
+      flex: 1;
+      position: relative;
+      z-index: 1;
+      overflow: visible; /* add this */
+    }
+    .leaflet-bottom {
+      z-index: 1000 !important;
+    } 
 
-<link rel="stylesheet" href="css/leaflet-search.css">
-<link rel="stylesheet" href="css/loading.css">
-<script src="js/leaflet-search.js"></script>
+    .leaflet-control {
+      z-index: 1000 !important;
+    }
+    /* ── Loader ── */
+    .loader-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(13,13,13,0.82);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      backdrop-filter: blur(4px);
+      gap: 20px;
+    }
+ 
+    .loader-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--accent);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+ 
+    .loader {
+      width: 40px;
+      height: 40px;
+      border: 2px solid rgba(232,255,71,0.2);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+ 
+    @keyframes spin { to { transform: rotate(360deg); } }
+ 
+    .progress-container {
+      width: 200px;
+      height: 2px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+ 
+    .progress-bar {
+      height: 100%;
+      background: var(--accent);
+      transition: width 0.3s ease;
+      border-radius: 2px;
+    }
+ 
+    /* ── Side Panel ── */
+    .panel {
+      width: var(--panel-w);
+      background: var(--panel);
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+      z-index: 10;
+    }
+ 
+    .panel-header {
+      padding: 24px 24px 0;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 20px;
+    }
+ 
+    .panel-eyebrow {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+ 
+    .panel-title {
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+    }
+ 
+    .panel-title span {
+      color: var(--accent2);
+    }
+ 
+    .panel-subtitle {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+ 
+    /* ── Scrollable content ── */
+    .panel-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+    }
+ 
+    /* ── Search box ── */
+    .search-wrap {
+      position: relative;
+    }
+ 
+    .search-wrap .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      font-size: 13px;
+      pointer-events: none;
+      z-index: 2;
+    }
+ 
+    #findbox {
+      width: 100%;
+    }
+ 
+    #findbox .search-input {
+      width: 100% !important;
+      padding: 10px 12px 10px 34px !important;
+      font-family: var(--mono) !important;
+      font-size: 12px !important;
+      border: 1px solid var(--border) !important;
+      border-radius: var(--radius) !important;
+      background: var(--paper) !important;
+      color: var(--ink) !important;
+      outline: none !important;
+      transition: border-color 0.2s !important;
+    }
+ 
+    #findbox .search-input:focus {
+      border-color: var(--ink) !important;
+    }
+ 
+    /* ── Section labels ── */
+    .section-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+ 
+    /* ── Filter group ── */
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+ 
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+ 
+    .field label {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+ 
+    .field select,
+    .field input[type="date"] {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--ink);
+      background: var(--paper);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 9px 12px;
+      width: 100%;
+      outline: none;
+      transition: border-color 0.2s;
+      appearance: none;
+      -webkit-appearance: none;
+      cursor: pointer;
+    }
+ 
+    .field select:focus,
+    .field input[type="date"]:focus {
+      border-color: var(--ink);
+    }
+ 
+    .select-wrap {
+      position: relative;
+    }
+ 
+    .select-wrap::after {
+      content: '↓';
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 11px;
+      color: var(--muted);
+      pointer-events: none;
+    }
+ 
+    .date-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+ 
+    /* ── Borough chips ── */
+    .borough-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+ 
+    .boro-chip {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.05em;
+      padding: 5px 10px;
+      border-radius: 100px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s;
+      user-select: none;
+    }
+ 
+    .boro-chip.active {
+      background: var(--ink);
+      border-color: var(--ink);
+      color: var(--accent);
+    }
+ 
+    .boro-chip:hover:not(.active) {
+      border-color: var(--ink);
+      color: var(--ink);
+    }
+ 
+    /* ── Buttons ── */
+    .btn-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+    }
+ 
+    .btn-primary {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: var(--ink);
+      color: var(--accent);
+      border: none;
+      border-radius: var(--radius);
+      padding: 11px 16px;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+ 
+    .btn-primary:hover { opacity: 0.85; }
+    .btn-primary:active { transform: scale(0.98); }
+ 
+    .btn-ghost {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.05em;
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 11px 14px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+ 
+    .btn-ghost:hover {
+      border-color: var(--ink);
+      color: var(--ink);
+    }
+ 
+    /* ── Divider ── */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+    }
+ 
+    /* ── Table section ── */
+    .table-section {
+      flex-shrink: 0;
+      border-top: 1px solid var(--border);
+      max-height: 280px;
+      overflow-y: auto;
+    }
+ 
+    .table-header {
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      background: var(--panel);
+      z-index: 2;
+      border-bottom: 1px solid var(--border);
+    }
+ 
+    .table-header-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+ 
+    #tableDiv {
+      padding: 0 0 8px;
+    }
+ 
+    /* Tabulator overrides */
+    .tabulator {
+      border: none !important;
+      font-family: var(--mono) !important;
+      font-size: 11px !important;
+      background: transparent !important;
+    }
+ 
+    .tabulator .tabulator-header {
+      background: var(--paper) !important;
+      border-bottom: 1px solid var(--border) !important;
+    }
+ 
+    .tabulator .tabulator-col {
+      background: var(--paper) !important;
+      border-right: none !important;
+      font-size: 9px !important;
+      letter-spacing: 0.1em !important;
+      text-transform: uppercase !important;
+      color: var(--muted) !important;
+      padding: 8px 12px !important;
+    }
+ 
+    .tabulator .tabulator-row {
+      border-bottom: 1px solid var(--border) !important;
+      cursor: pointer;
+    }
+ 
+    .tabulator .tabulator-row:hover {
+      background: var(--paper) !important;
+    }
+ 
+    .tabulator .tabulator-cell {
+      padding: 8px 12px !important;
+      color: var(--ink) !important;
+      border-right: none !important;
+    }
+ 
+    /* ── Hidden select (borough handled by chips) ── */
+    #boroughSelect { display: none; }
+  </style>
+ 
+  <script defer>
+    // Borough chip → hidden select sync
+    document.addEventListener('DOMContentLoaded', () => {
+      const chips = document.querySelectorAll('.boro-chip');
+      const select = document.getElementById('boroughSelect');
+ 
+      chips.forEach(chip => {
+        chip.addEventListener('click', () => {
+          chip.classList.toggle('active');
+          // sync to hidden select
+          const active = [...document.querySelectorAll('.boro-chip.active')].map(c => c.dataset.val);
+          [...select.options].forEach(opt => {
+            opt.selected = active.includes(opt.value) || active.length === 0;
+          });
+        });
+      });
+    });
+  </script>
 </head>
 <body>
-<div id="map" >
-  <div class="loader-overlay" id="loaderOverlay">
-    <div class="loader" id="loader"></div>
-    <div class="progress-container">
-      <div class="progress-bar" id="progressBar" style="width: 0%;"></div>
+<div id="app">
+ 
+  <!-- Map fills the left/main area -->
+  <div id="map">
+    <div class="loader-overlay" id="loaderOverlay">
+      <div class="loader-label">Loading NYC events</div>
+      <div class="loader" id="loader"></div>
+      <div class="progress-container">
+        <div class="progress-bar" id="progressBar" style="width: 0%;"></div>
+      </div>
     </div>
   </div>
-  
-  <div class="main">
-    <h1 class="display-4 mb-3">Mapping NYC Permitted Events</h1>
-    <h2><i>Find what is happening near you!</i></h2>
-
-    <p>Please enter what event you are looking for in the search box below</p>
-    <search>
-      <div id='findbox'></div>
-    </search>
-    
-    <div class="search-section">
-      <form id="filterForm" onsubmit="return false;">
-        <label for="boroughSelect">Borough:</label>
-        <select id="boroughSelect" multiple>
-          <option value="">All</option>
-          <option value="Manhattan">Manhattan</option>
-          <option value="Brooklyn">Brooklyn</option>
-          <option value="Queens">Queens</option>
-          <option value="Bronx">Bronx</option>
-          <option value="Staten Island">Staten Island</option>
-        </select>
-        <br><br>
-        <label for="eventTypeSelect">Event Type:</label>
-        <select id="eventTypeSelect">
-          <option value="">All</option>
-        </select>
-        <br><br>
-        <label for="dateInput1">Date Start:</label>
-        <input type="date" id="dateInput1">
-        <br><br>
-        <label for="dateInput2">Date End:</label>
-        <input type="date" id="dateInput2">
-        <br><br>
-        <button type="button" onclick="applyFilters()">Apply Filters</button>
-        <button type="button" onclick="resetFilters()">Reset</button>
-      </form>
+ 
+  <!-- Right panel -->
+  <aside class="panel">
+ 
+    <div class="panel-header">
+      <div class="panel-eyebrow">New York City</div>
+      <h1 class="panel-title">Events<span>.</span></h1>
+      <p class="panel-subtitle">Permitted events & street activity</p>
     </div>
-  
+ 
+    <div class="panel-body">
+ 
+      <!-- Search -->
+      <div>
+        <div class="section-label">Search by name</div>
+        <div class="search-wrap">
+          <i class="fa fa-search search-icon"></i>
+          <div id="findbox"></div>
+        </div>
+      </div>
+ 
+      <hr class="divider">
+ 
+      <!-- Filters -->
+      <div>
+        <div class="section-label">Filter events</div>
+        <div class="filter-group">
+ 
+          <!-- Borough chips -->
+          <div class="field">
+            <label>Borough</label>
+            <div class="borough-chips">
+              <span class="boro-chip" data-val="Manhattan">Manhattan</span>
+              <span class="boro-chip" data-val="Brooklyn">Brooklyn</span>
+              <span class="boro-chip" data-val="Queens">Queens</span>
+              <span class="boro-chip" data-val="Bronx">Bronx</span>
+              <span class="boro-chip" data-val="Staten Island">Staten Island</span>
+            </div>
+            <!-- Hidden select for JS compatibility -->
+            <select id="boroughSelect" multiple>
+              <option value="">All</option>
+              <option value="Manhattan">Manhattan</option>
+              <option value="Brooklyn">Brooklyn</option>
+              <option value="Queens">Queens</option>
+              <option value="Bronx">Bronx</option>
+              <option value="Staten Island">Staten Island</option>
+            </select>
+          </div>
+ 
+          <!-- Event type -->
+          <div class="field">
+            <label>Event type</label>
+            <div class="select-wrap">
+              <select id="eventTypeSelect">
+                <option value="">All types</option>
+              </select>
+            </div>
+          </div>
+ 
+          <!-- Dates -->
+          <div class="field">
+            <label>Date range</label>
+            <div class="date-row">
+              <input type="date" id="dateInput1" placeholder="From">
+              <input type="date" id="dateInput2" placeholder="To">
+            </div>
+          </div>
+ 
+        </div>
+      </div>
+ 
+      <div class="btn-row">
+        <button class="btn-primary" type="button" onclick="applyFilters()">Apply filters</button>
+        <button class="btn-ghost" type="button" onclick="resetFilters(); document.querySelectorAll('.boro-chip').forEach(c=>c.classList.remove('active'))">Reset</button>
+      </div>
+ 
+    </div>
+ 
+    <!-- Results table -->
+    <div class="table-section">
+      <div class="table-header">
+        <span class="table-header-label">Results</span>
+      </div>
+      <div id="tableDiv"></div>
+    </div>
+ 
+  </aside>
+ 
 </div>
-  </div>
-      <div id="example-table"></div>
-    <div id="tableDiv"></div>
+ 
+<script src="js/map_init.js" defer></script>
 </body>
 </html>
