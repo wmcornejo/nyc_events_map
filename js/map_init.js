@@ -419,7 +419,9 @@ fetch('data/Athletic Facilities_20250923.geojson')
         layer.bindPopup(`<strong>${name}</strong><br>${date}`);
       }
     });
+    eventPolygonLayer.addTo(map);  // <-- add this
     layerControl.addOverlay(eventPolygonLayer, 'Event Polygons');
+    window.originalEventLayer = eventPolygonLayer; 
     const eventTypeSelect = document.getElementById('eventTypeSelect');
     eventtypes.forEach(type => {
       const option = document.createElement('option');
@@ -435,11 +437,11 @@ fetch('data/Athletic Facilities_20250923.geojson')
       initial: false,
       collapsed: false
     }));
-    
+    /*
     if (eventPolygonLayer && map.hasLayer(eventPolygonLayer)) {
       console.log('About to remove'); 
       map.removeLayer(eventPolygonLayer);
-    }
+    }*/
     const loaderOverlay = document.getElementById('loaderOverlay');
     if (loaderOverlay) loaderOverlay.style.display = 'none';
 
@@ -456,7 +458,10 @@ fetch('data/Athletic Facilities_20250923.geojson')
 
 function applyFilters() {
     console.log('Applying filters...');
-
+    if (eventPolygonLayer && map.hasLayer(eventPolygonLayer)) {
+        map.removeLayer(eventPolygonLayer);
+    }
+    layerControl.removeLayer(eventPolygonLayer);
     const borough = document.getElementById('boroughSelect').value;
     const selectedBoroughs = Array.from(boroughSelect.selectedOptions)
         .map(option => option.value)
@@ -649,6 +654,10 @@ function resetFilters() {
   if (window.eventSearchControl) {
     map.removeControl(window.eventSearchControl);
     window.eventSearchControl = null;
+  }
+  if (eventPolygonLayer && !map.hasLayer(eventPolygonLayer)) {
+    eventPolygonLayer.addTo(map);
+    layerControl.addOverlay(eventPolygonLayer, 'Event Polygons');
   }
 }
 document.querySelector('.main').addEventListener('wheel', function(e) {
