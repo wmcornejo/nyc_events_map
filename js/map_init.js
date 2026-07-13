@@ -458,10 +458,14 @@ fetch('data/Athletic Facilities_20250923.geojson')
 
 function applyFilters() {
     console.log('Applying filters...');
-    if (eventPolygonLayer && map.hasLayer(eventPolygonLayer)) {
-        map.removeLayer(eventPolygonLayer);
+    if (window.originalEventLayer && map.hasLayer(window.originalEventLayer)) {
+        map.removeLayer(window.originalEventLayer);
+        layerControl.removeLayer(window.originalEventLayer);
     }
-    layerControl.removeLayer(eventPolygonLayer);
+    if (window.filteredEventLayer && map.hasLayer(window.filteredEventLayer)) {
+        map.removeLayer(window.filteredEventLayer);
+        layerControl.removeLayer(window.filteredEventLayer);
+    }
     const borough = document.getElementById('boroughSelect').value;
     const selectedBoroughs = Array.from(boroughSelect.selectedOptions)
         .map(option => option.value)
@@ -547,7 +551,7 @@ function applyFilters() {
     // Re-initialize the search control with the filtered layer
     window.eventSearchControl = new L.Control.Search({
         container: 'findbox',
-        layer: eventPolygonLayer,
+        layer: window.filteredEventLayer,
         propertyName: 'event_name',
         initial: false,
         collapsed: false
@@ -643,9 +647,15 @@ function showTable(features){
   
 }
 
-// Reset filters
 function resetFilters() {
-  document.getElementById('filterForm').reset();
+  // Manually reset fields (no form element in new HTML)
+  document.getElementById('eventTypeSelect').value = '';
+  document.getElementById('dateInput1').value = '';
+  document.getElementById('dateInput2').value = '';
+  document.querySelectorAll('.boro-chip').forEach(c => c.classList.remove('active'));
+  // Reset hidden borough select to "all"
+  [...document.getElementById('boroughSelect').options].forEach(o => o.selected = false);
+
   if (window.filteredEventLayer) {
     map.removeLayer(window.filteredEventLayer);
     layerControl.removeLayer(window.filteredEventLayer);
@@ -655,12 +665,24 @@ function resetFilters() {
     map.removeControl(window.eventSearchControl);
     window.eventSearchControl = null;
   }
-  if (eventPolygonLayer && !map.hasLayer(eventPolygonLayer)) {
-    eventPolygonLayer.addTo(map);
-    layerControl.addOverlay(eventPolygonLayer, 'Event Polygons');
+
+  if (window.originalEventLayer && !map.hasLayer(window.originalEventLayer)) {
+    window.originalEventLayer.addTo(map);
+    layerControl.addOverlay(window.originalEventLayer, 'Event Polygons');
   }
+
+  document.getElementById('findbox').innerHTML = '';
+  map.addControl(new L.Control.Search({
+    container: 'findbox',
+    layer: window.originalEventLayer,
+    propertyName: 'event_name',
+    initial: false,
+    collapsed: false
+  }));
+
+  document.getElementById('tableDiv').innerHTML = '';
 }
-document.querySelector('.main').addEventListener('wheel', function(e) {
+document.querySelector('.panel').addEventListener('wheel', function(e) {
   e.stopPropagation();
 });
 
